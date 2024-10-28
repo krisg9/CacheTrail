@@ -1,0 +1,7 @@
+# Project exclude paths
+*.iml
+.idea/
+.gradle/
+build/
+local. Properties
+.DS_Store
