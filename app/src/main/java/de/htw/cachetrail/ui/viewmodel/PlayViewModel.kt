@@ -1,28 +1,17 @@
 package de.htw.cachetrail.ui.viewmodel
 
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.htw.cachetrail.ServiceLocator
-import de.htw.cachetrail.data.Trail
-import kotlinx.coroutines.launch
+import de.htw.cachetrail.di.ServiceLocator
+import de.htw.cachetrail.data.model.Trail
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 
-class PlayViewModel: ViewModel() {
+class PlayViewModel : ViewModel() {
 
-    private val trailRepository = ServiceLocator.getTrailRepository()
+    private val trailsRepository = ServiceLocator.getTrailRepository()
 
-    private val _trails: MutableState<List<Trail>> = mutableStateOf(emptyList())
-    val trails: State<List<Trail>> = _trails
-
-    init {
-        loadTrails()
-    }
-
-    private fun loadTrails() {
-        viewModelScope.launch {
-            _trails.value = trailRepository.getAllTrails()
-        }
-    }
+    val trails: StateFlow<List<Trail>> = trailsRepository.getAllTrails().stateIn(
+        viewModelScope, SharingStarted.Lazily, emptyList())
 }

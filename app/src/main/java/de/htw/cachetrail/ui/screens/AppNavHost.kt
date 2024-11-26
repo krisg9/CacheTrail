@@ -16,10 +16,19 @@ fun AppNavHost(navController: NavHostController) {
             PlayScreen()
         }
         composable(Routes.EDIT) {
-            EditScreen(navController = navController)
+            EditScreen(navController)
+        }
+        composable(Routes.EDIT_TRAIL) { backStackEntry ->
+            val trailId = backStackEntry.arguments?.getString("trailId")
+            trailId?.let {
+                EditTrailScreen(navController = navController, trailId)
+            }
         }
         composable(Routes.MAP) {
             MapScreen(navController = navController)
+        }
+        composable(Routes.ADD_SCREEN) {
+            AddScreen(navController = navController)
         }
     }
 }
