@@ -48,7 +48,6 @@ fun PlayScreen() {
 fun TrailList(
     trails: List<Trail>,
     onTrailClick: (Trail) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),

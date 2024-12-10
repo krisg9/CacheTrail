@@ -1,5 +1,7 @@
 package de.htw.cachetrail.ui.screens
 
+import android.annotation.SuppressLint
+import android.view.MotionEvent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,13 +36,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import de.htw.cachetrail.data.model.MapUtils
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.ui.viewmodel.EditTrailsViewModel
+import org.osmdroid.api.IGeoPoint
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 import java.util.UUID
 
 @Composable
@@ -194,6 +205,11 @@ fun StationItem(station: Station, onDelete: (Station) -> Unit) {
 
 @Composable
 fun AddMarkerDialog(onDismiss: () -> Unit = {}, onAdd: (Station) -> Unit) {
+    var question by remember { mutableStateOf("") }
+    var answer by remember { mutableStateOf("") }
+    var latitude by remember { mutableStateOf("") }
+    var longitude by remember { mutableStateOf("") }
+    var isMapDialogOpen by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
         Box(
@@ -205,17 +221,12 @@ fun AddMarkerDialog(onDismiss: () -> Unit = {}, onAdd: (Station) -> Unit) {
                     .align(Alignment.Center)
                     .background(Color.White, shape = RoundedCornerShape(12.dp))
                     .padding(16.dp)
-//                    .size(300.dp)
             ) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    var question by remember { mutableStateOf("") }
-                    var answer by remember { mutableStateOf("") }
-                    var latitude by remember { mutableStateOf("") }
-                    var longitude by remember { mutableStateOf("") }
 
                     val isFormValid = isValidLongitude(longitude) && isValidLatitude(latitude)
 
@@ -238,22 +249,18 @@ fun AddMarkerDialog(onDismiss: () -> Unit = {}, onAdd: (Station) -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    TextField(
-                        value = latitude,
-                        onValueChange = { latitude = it },
-                        label = { Text("Latitude") },
-                        isError = !isValidLatitude(latitude),
+                    Button(
+                        onClick = { isMapDialogOpen = true },
                         modifier = Modifier.fillMaxWidth()
-                    )
-
-                    TextField(
-                        value = longitude,
-                        onValueChange = { longitude = it },
-                        label = { Text("Longitude") },
-                        isError = !isValidLongitude(longitude),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
+                    ) {
+                        Text(
+                            text = if (latitude.isEmpty() || longitude.isEmpty()) {
+                                "Pick Location"
+                            } else {
+                                "Edit Location (${latitude.take(8)}, ${longitude.take(8)})"
+                            }
+                        )
+                    }
 
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -288,6 +295,17 @@ fun AddMarkerDialog(onDismiss: () -> Unit = {}, onAdd: (Station) -> Unit) {
             }
         }
     }
+
+    if (isMapDialogOpen) {
+        MapPickerDialog(
+            onDismiss = { isMapDialogOpen = false },
+            onSubmit = { lat, lon ->
+                latitude = lat.toString()
+                longitude = lon.toString()
+                isMapDialogOpen = false
+            }
+        )
+    }
 }
 
 private fun isValidLatitude(latitude: String): Boolean {
@@ -298,4 +316,90 @@ private fun isValidLatitude(latitude: String): Boolean {
 fun isValidLongitude(longitude: String): Boolean {
     val lon = longitude.toDoubleOrNull()
     return lon != null && lon in -180.0..180.0
+}
+
+@SuppressLint("ClickableViewAccessibility")
+@Composable
+fun MapPickerDialog(onDismiss: () -> Unit, onSubmit: (Double, Double) -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .background(Color.White, shape = RoundedCornerShape(12.dp))
+            ) {
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .background(Color.White, shape = RoundedCornerShape(12.dp))
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Pick a Location",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+
+                    val context = LocalContext.current
+                    val mapView = remember { MapView(context) }
+                    val selectedLocation = remember { mutableStateOf<GeoPoint?>(null) }
+
+                    DisposableEffect(context) {
+                        mapView.apply {
+                            setTileSource(TileSourceFactory.MAPNIK)
+                            controller.setZoom(15)
+                            controller.setCenter(MapUtils.BERLIN_COORDINATES)
+                            clipToOutline = true
+                        }
+
+                        onDispose {
+                            mapView.onDetach()
+                        }
+                    }
+
+                    AndroidView(
+                        factory = { mapView },
+                        modifier = Modifier
+                            .height(300.dp)
+                            .padding(30.dp)
+                    ) { map ->
+                        map.setOnTouchListener { _, event ->
+                            if (event.action == MotionEvent.ACTION_DOWN) {
+                                val geoPoint =
+                                    mapView.projection.fromPixels(event.x.toInt(), event.y.toInt())
+
+                                mapView.overlays.clear()
+                                val marker = Marker(mapView)
+
+                                marker.position = geoPoint as GeoPoint
+
+                                mapView.overlays.add(marker)
+                                selectedLocation.value = geoPoint
+                            }
+                            false
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            selectedLocation.value?.let { location ->
+                                onSubmit(location.latitude, location.longitude)
+                            }
+                        },
+                        enabled = selectedLocation.value != null
+                    ) {
+                        Text("Submit Location")
+                    }
+
+                    Button(
+                        onClick = onDismiss
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            }
+        }
+    }
 }
