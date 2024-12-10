@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import de.htw.cachetrail.ui.nav.Routes
 
 @Composable
 fun HomeScreen(navController: NavHostController) {

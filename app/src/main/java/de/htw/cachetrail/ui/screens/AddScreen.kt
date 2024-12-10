@@ -46,7 +46,6 @@ import androidx.navigation.NavController
 import de.htw.cachetrail.data.model.MapUtils
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.ui.viewmodel.EditTrailsViewModel
-import org.osmdroid.api.IGeoPoint
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -354,6 +353,7 @@ fun MapPickerDialog(onDismiss: () -> Unit, onSubmit: (Double, Double) -> Unit) {
                             clipToOutline = true
                         }
 
+
                         onDispose {
                             mapView.onDetach()
                         }
@@ -365,6 +365,7 @@ fun MapPickerDialog(onDismiss: () -> Unit, onSubmit: (Double, Double) -> Unit) {
                             .height(300.dp)
                             .padding(30.dp)
                     ) { map ->
+
                         map.setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
                                 val geoPoint =

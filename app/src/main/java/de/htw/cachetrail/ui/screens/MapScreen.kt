@@ -11,7 +11,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
 @Composable
-fun MapScreen(navController: NavController) {
+fun MapTest(navController: NavController) {
 AndroidView(
     modifier = Modifier.padding(top = 16.dp, bottom = 16.dp)
         .systemBarsPadding(),

@@ -1,4 +1,4 @@
-package de.htw.cachetrail.ui.screens
+package de.htw.cachetrail.ui.nav
 
 object Routes {
     const val EDIT = "edit"
@@ -7,4 +7,5 @@ object Routes {
     const val EDIT_TRAIL = "editTrail/{trailId}"
     const val MAP = "map"
     const val ADD_SCREEN = "add_screen"
+    const val PLAY_MAP = "play_map/{trailId}"
 }

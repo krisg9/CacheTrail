@@ -25,12 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import de.htw.cachetrail.data.model.Trail
+import de.htw.cachetrail.ui.nav.Routes
 import de.htw.cachetrail.ui.viewmodel.EditTrailsViewModel
 import de.htw.cachetrail.ui.viewmodel.PlayViewModel
 
 @Composable
-fun PlayScreen() {
+fun PlayScreen(navController: NavController) {
 
     val playViewModel: PlayViewModel = viewModel()
 
@@ -40,7 +42,24 @@ fun PlayScreen() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        TrailList(trails, {})
+        if (trails.isEmpty()) {
+            Text(
+                text = "No trails available.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        } else {
+            TrailList(
+                trails,
+                onTrailClick = { trail ->
+                    navController.navigate(
+                        Routes.PLAY_MAP.replace(
+                            "{trailId}",
+                            trail.id
+                        )
+                    )
+                })
+        }
     }
 }
 

@@ -1,9 +1,16 @@
-package de.htw.cachetrail.ui.screens
+package de.htw.cachetrail.ui.nav
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import de.htw.cachetrail.ui.screens.AddScreen
+import de.htw.cachetrail.ui.screens.EditScreen
+import de.htw.cachetrail.ui.screens.EditTrailScreen
+import de.htw.cachetrail.ui.screens.HomeScreen
+import de.htw.cachetrail.ui.screens.Map
+import de.htw.cachetrail.ui.screens.MapTest
+import de.htw.cachetrail.ui.screens.PlayScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
@@ -13,7 +20,7 @@ fun AppNavHost(navController: NavHostController) {
             HomeScreen(navController)
         }
         composable(Routes.PLAY) {
-            PlayScreen()
+            PlayScreen(navController = navController)
         }
         composable(Routes.EDIT) {
             EditScreen(navController)
@@ -25,10 +32,16 @@ fun AppNavHost(navController: NavHostController) {
             }
         }
         composable(Routes.MAP) {
-            MapScreen(navController = navController)
+            MapTest(navController = navController)
         }
         composable(Routes.ADD_SCREEN) {
             AddScreen(navController = navController)
+        }
+        composable(Routes.PLAY_MAP) { backStackEntry ->
+            val trailId = backStackEntry.arguments?.getString("trailId")
+            trailId?.let {
+                Map(trailId)
+            }
         }
     }
 }

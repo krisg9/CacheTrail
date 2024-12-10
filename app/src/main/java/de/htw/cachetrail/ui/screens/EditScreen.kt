@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import de.htw.cachetrail.data.model.Trail
+import de.htw.cachetrail.ui.nav.Routes
 import de.htw.cachetrail.ui.viewmodel.EditTrailsViewModel
 import de.htw.cachetrail.ui.viewmodel.PlayViewModel
 import java.util.UUID

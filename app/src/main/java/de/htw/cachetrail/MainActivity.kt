@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import de.htw.cachetrail.ui.screens.AppNavHost
+import de.htw.cachetrail.ui.nav.AppNavHost
 import de.htw.cachetrail.ui.theme.CacheTrailTheme
 import org.osmdroid.config.Configuration
 
