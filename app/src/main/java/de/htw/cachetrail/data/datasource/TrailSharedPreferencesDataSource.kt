@@ -1,14 +1,20 @@
 package de.htw.cachetrail.data.datasource
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.data.model.Trail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class TrailSharedPreferencesDataSource(context: Context) {
-    private val sharedPreferences = context.getSharedPreferences("trails", Context.MODE_PRIVATE)
+class TrailSharedPreferencesDataSource(
+    context: Context,
+    private val sharedPreferences: SharedPreferences = context.getSharedPreferences(
+        "trails",
+        Context.MODE_PRIVATE
+    )
+) {
     private val gson = Gson()
     private val trails = MutableStateFlow<List<Trail>>(emptyList())
 

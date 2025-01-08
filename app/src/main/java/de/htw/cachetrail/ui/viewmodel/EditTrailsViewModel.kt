@@ -5,46 +5,49 @@ import androidx.lifecycle.viewModelScope
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.data.model.Trail
 import de.htw.cachetrail.di.ServiceLocator
+import de.htw.cachetrail.domain.CacheTrailService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
-class EditTrailsViewModel : ViewModel() {
+class EditTrailsViewModel(
+    private val service: CacheTrailService = ServiceLocator.getTrailService()
+) :
+    ViewModel() {
 
-    private val trailRepository = ServiceLocator.getTrailRepository()
     val stations = emptyList<Station>()
 
     fun addStation(trailId: String, station: Station) {
         viewModelScope.launch {
-            trailRepository.addStation(trailId, station)
+            service.addStation(trailId, station)
         }
     }
 
     fun deleteStation(station: Station) {
         viewModelScope.launch {
-            val trailId = trailRepository.getAllTrails().first()
+            val trailId = service.getAllTrails().first()
                 .find { trail ->
                     trail.stations.any { it.id == station.id }
                 }?.id
 
             trailId?.let {
-                trailRepository.deleteStation(it, station)
+                service.deleteStation(it, station)
             }
         }
     }
 
     fun addTrail(newTrail: Trail) {
-        trailRepository.addTrail(newTrail)
+        service.addTrail(newTrail)
     }
 
     fun getTrailById(trailId: String): Flow<Trail?> {
-        return trailRepository.getAllTrails().map { trails ->
+        return service.getAllTrails().map { trails ->
             trails.find { it.id == trailId }
         }
     }
 
     fun deleteTrail(trailId: String) {
-        trailRepository.deleteTrail(trailId)
+        service.deleteTrail(trailId)
     }
 }

@@ -5,63 +5,77 @@ import androidx.lifecycle.viewModelScope
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.data.model.Trail
 import de.htw.cachetrail.di.ServiceLocator
+import de.htw.cachetrail.domain.CacheTrailService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MapScreenViewModel : ViewModel() {
+class MapScreenViewModel(private val trailService: CacheTrailService = ServiceLocator.getTrailService()) :
+    ViewModel() {
 
-    private val trailsRepository = ServiceLocator.getTrailRepository()
+    private val _gameState = MutableStateFlow(GameState())
+    val gameState: StateFlow<GameState>
+        get() = _gameState
 
-    private val _currentTrail = MutableStateFlow(Trail("", ""))
-    val currentTrail: StateFlow<Trail> get() = _currentTrail.asStateFlow()
+    init {
+        resetGame()
+    }
 
-    private var _currentStationIndex = 0
-
-    private val _currentStation = MutableStateFlow(
-        Station("", 0.0, 0.0, "", "")
-    )
-
-    val station: StateFlow<Station> get() = _currentStation
-
-    private val _feedback = MutableStateFlow<String?>(null)
-    val feedback: StateFlow<String?> get() = _feedback
-
-    fun chooseTrail(trailId: String) {
+    fun loadTrail(trailId: String) {
         viewModelScope.launch {
-            val trail = trailsRepository.getAllTrails().first().find { trail ->
-                trail.id == trailId
-            }
-            trail?.let {
-                _currentTrail.value = trail
-                _currentStation.value = _currentTrail.value.stations[0]
+            val trail = trailService.getAllTrails().firstOrNull()?.find { it.id == trailId }
+            _gameState.update {
+                it.copy(
+                    currentTrail = trail,
+                    currentStationIndex = 0,
+                    feedback = null,
+                    isGameCompleted = false
+                )
             }
         }
     }
 
     fun submitAnswer(answer: String) {
-        if (answer.equals(
-                _currentStation.value.answer,
-                ignoreCase = true
-            )
-        ) {
-            _feedback.value = "Correct! Moving to the next station."
-            _currentStation.value = _currentTrail.value.stations[_currentStationIndex]
+        val currentStation = _gameState.value.currentStation
+        if (currentStation != null && answer.equals(currentStation.answer, ignoreCase = true)) {
+            moveToNextStation()
         } else {
-            _feedback.value = "Incorrect answer. Try again!"
+            _gameState.update { it.copy(feedback = Feedback.INCORRECT) }
         }
     }
 
     private fun moveToNextStation() {
-        if (_currentStationIndex < _currentTrail.value.stations.size - 1) {
-            _currentStationIndex++
+        _gameState.update { state ->
+            val nextIndex = state.currentStationIndex + 1
+            val isCompleted = nextIndex >= (state.currentTrail?.stations?.size ?: 0)
+
+            state.copy(
+                feedback = if (isCompleted) Feedback.COMPLETED else null,
+                currentStationIndex = nextIndex,
+                isGameCompleted = isCompleted
+            )
         }
     }
 
-
-    private fun resetIndex() {
-        _currentStationIndex = 0
+    private fun resetGame() {
+        _gameState.value = GameState()
     }
+
+    data class GameState(
+        val currentTrail: Trail? = null,
+        val currentStationIndex: Int = 0,
+        val feedback: Feedback? = null,
+        val isGameCompleted: Boolean = false
+    ) {
+        val currentStation: Station?
+            get() = currentTrail?.stations?.getOrNull(currentStationIndex)
+    }
+}
+
+enum class Feedback {
+    CORRECT,
+    INCORRECT,
+    COMPLETED
 }
