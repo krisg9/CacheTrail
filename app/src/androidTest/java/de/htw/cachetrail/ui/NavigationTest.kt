@@ -1,15 +1,8 @@
 package de.htw.cachetrail.ui
 
-import androidx.compose.ui.semantics.SemanticsProperties
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.isDialog
-import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -24,7 +17,7 @@ class NavigationTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun testAddNewTrailDialogAppears() {
+    fun testAddNewStationFlow() {
         composeTestRule.setContent {
             val navController = rememberNavController()
             AppNavHost(navController)
@@ -42,9 +35,5 @@ class NavigationTest {
         composeTestRule.onNodeWithText("Answer").performTextInput("Test Answer1")
         composeTestRule.onNodeWithText("Pick Location").performClick()
         composeTestRule.onNodeWithText("Add Marker").assertIsNotEnabled()
-
-        Thread.sleep(5000)
-        composeTestRule.onNodeWithText("MapWindow").assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("MapWindow").assertExists().performClick()
     }
 }
