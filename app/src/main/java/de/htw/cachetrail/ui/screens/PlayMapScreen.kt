@@ -16,6 +16,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,7 +35,11 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
 @Composable
-fun Map(trailId: String, navController: NavHostController) {
+fun Map(
+    trailId: String,
+    navController: NavHostController,
+    modifier: Modifier = Modifier.testTag("MapWindow")
+) {
     val mapViewModel: MapScreenViewModel = viewModel()
 
     val gameState by mapViewModel.gameState.collectAsStateWithLifecycle()
@@ -50,6 +58,7 @@ fun Map(trailId: String, navController: NavHostController) {
     }
 
     AndroidView(
+        modifier = Modifier.testTag("MapWindow").semantics { text = AnnotatedString("MapWindow") },
         factory = { context ->
             MapView(context).apply {
                 setTileSource(TileSourceFactory.MAPNIK)
