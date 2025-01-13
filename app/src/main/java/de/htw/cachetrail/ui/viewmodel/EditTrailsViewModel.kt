@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.data.model.Trail
 import de.htw.cachetrail.di.ServiceLocator
-import de.htw.cachetrail.domain.CacheTrailService
+import de.htw.cachetrail.domain.ICacheTrailService
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class EditTrailsViewModel(
-    private val service: CacheTrailService = ServiceLocator.getTrailService()
+    private val service: ICacheTrailService = ServiceLocator.getTrailService()
 ) :
     ViewModel() {
 

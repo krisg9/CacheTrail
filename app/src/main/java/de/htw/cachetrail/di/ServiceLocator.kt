@@ -5,6 +5,7 @@ import de.htw.cachetrail.data.repository.ITrailsRepository
 import de.htw.cachetrail.data.repository.TrailRepository
 import de.htw.cachetrail.data.datasource.TrailSharedPreferencesDataSource
 import de.htw.cachetrail.domain.CacheTrailService
+import de.htw.cachetrail.domain.ICacheTrailService
 import de.htw.cachetrail.domain.usecase.AddStationUseCase
 import de.htw.cachetrail.domain.usecase.AddTrailUseCase
 import de.htw.cachetrail.domain.usecase.DeleteStationUseCase
@@ -46,7 +47,7 @@ object ServiceLocator {
         return trailRepository
     }
 
-    fun getTrailService(): CacheTrailService {
+    fun getTrailService(): ICacheTrailService {
         return cacheTrailService
     }
 }

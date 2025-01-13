@@ -5,14 +5,14 @@ import androidx.lifecycle.viewModelScope
 import de.htw.cachetrail.data.model.Station
 import de.htw.cachetrail.data.model.Trail
 import de.htw.cachetrail.di.ServiceLocator
-import de.htw.cachetrail.domain.CacheTrailService
+import de.htw.cachetrail.domain.ICacheTrailService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MapScreenViewModel(private val trailService: CacheTrailService = ServiceLocator.getTrailService()) :
+class MapScreenViewModel(private val trailService: ICacheTrailService = ServiceLocator.getTrailService()) :
     ViewModel() {
 
     private val _gameState = MutableStateFlow(GameState())
